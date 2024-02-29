@@ -1,18 +1,130 @@
 import { Request, Response } from 'express'
 import Product from '../schemas/product.schema'
+import { IRequestWithUser } from './auth.controller'
 
 async function createProduct(req: Request, res: Response) {
   try {
     const newProduct = await Product.create(req.body)
-    newProduct.validate()
-    newProduct.save()
+    await newProduct.validate()
+    await newProduct.save()
 
     res
       .status(201)
       .json({ message: 'Product created successfully', product: newProduct })
   } catch (error: any) {
     console.error(error.message)
+    res.status(500).json({ message: error.message })
   }
 }
 
-export { createProduct }
+async function getProducts(req: Request, res: Response) {
+  try {
+    const products = await Product.find()
+    if (!products) {
+      throw new Error('No products found')
+    }
+    res.status(200).json({ products })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function getProductBySku(req: Request, res: Response) {
+  try {
+    const { sku } = req.params
+    const product = await Product.findOne({ sku })
+    // .select('productName')
+
+    if (!product) {
+      throw new Error('Product not found')
+    }
+    res.status(200).json({ product })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function updateProduct(req: Request, res: Response) {
+  try {
+    const { sku } = req.params
+    const updatedProduct = await Product.findOne({ sku })
+    if (!updatedProduct) {
+      throw new Error('Product not found')
+    }
+
+    updatedProduct.set(req.body)
+    await updatedProduct.validate()
+    await updatedProduct.save()
+
+    res.status(200).json({
+      message: 'Product updated successfully',
+      product: updatedProduct,
+    })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function deleteProduct(req: Request, res: Response) {
+  try {
+    const { sku } = req.params
+    const deletedProduct = await Product.findOneAndDelete({ sku })
+    if (!deletedProduct) {
+      throw new Error('Product not found')
+    }
+    res.status(200).json({
+      message: 'Product deleted successfully',
+      product: deletedProduct,
+    })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function searchProduct(req: Request, res: Response) {
+  try {
+    const { query } = req.query
+    const products = await Product.find({
+      productName: { $regex: query, $options: 'i' },
+    })
+    if (!products) {
+      throw new Error('No products found')
+    }
+    res.status(200).json({ products })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function addToFavorites(req: IRequestWithUser, res: Response) {
+  try {
+    const { sku } = req.params
+    const product = await Product.findOne({ sku })
+    if (!product) {
+      throw new Error('Product not found')
+    }
+
+    const user = req.user
+    user.favorites.push(product._id)
+    await user.save()
+
+    res.status(200).json({ message: 'Product added to favorites' })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
+export {
+  createProduct,
+  getProducts,
+  getProductBySku,
+  updateProduct,
+  deleteProduct,
+  searchProduct,
+  addToFavorites,
+}

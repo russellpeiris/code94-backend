@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import express, { type Express } from 'express'
 import { connectDB } from './config/DBconnect'
 import authRouter from './routes/auth.routes'
+import productRouter from './routes/product.routes'
 config()
 
 const app: Express = express()
@@ -20,7 +21,8 @@ app.use(express.json())
 
 const port = process.env.PORT ?? 4001
 
-app.use('/api', authRouter)
+app.use('/api/auth', authRouter)
+app.use('/api/products', productRouter)
 
 // Start the server after connecting to the database
 connectDB()

@@ -1,8 +1,11 @@
-import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { Types } from 'mongoose'
 import User from '../schemas/user.schema'
+import { Request, Response } from 'express'
 
+export interface IRequestWithUser extends Request {
+  user?: any
+}
 const generateToken = (res: Response, userId: Types.ObjectId) => {
   const jwtSecret = process.env.JWT_SECRET || ''
   const token = jwt.sign({ userId }, jwtSecret, {
@@ -24,7 +27,7 @@ const clearToken = (res: Response) => {
   })
 }
 
-async function login(req: Request, res: Response) {
+async function login(req: IRequestWithUser, res: Response) {
   try {
     const { username, password } = req.body
     const user = await User.findOne({ username })
@@ -40,6 +43,7 @@ async function login(req: Request, res: Response) {
     }
 
     generateToken(res, user._id)
+    req.user = user
     res.status(200).json({ message: 'Logged in successfully', user })
   } catch (error: any) {
     console.error(error.message)

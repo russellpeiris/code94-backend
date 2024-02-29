@@ -2,11 +2,11 @@ import { Schema, model } from 'mongoose'
 
 export interface IProduct extends Document {
   sku: string
-  productQuantity?: number
-  productName?: string
-  productPrice?: number
-  productImages?: string[]
-  productDescription?: string
+  productQuantity: number
+  productName: string
+  productPrice: number
+  productImages: string[]
+  productDescription: string
 }
 
 const productSchema = new Schema({
@@ -30,10 +30,13 @@ const productSchema = new Schema({
   productImages: {
     type: [String],
     required: true,
+    validate: {
+      validator: (v: string[]) => v.length > 0,
+      message: 'At least one image is required',
+    },
   },
   productDescription: {
     type: String,
-    required: true,
   },
 })
 
