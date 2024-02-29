@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import Product from '../schemas/product.schema'
+import Product, { IProduct } from '../schemas/product.schema'
 import { IRequestWithUser } from './auth.controller'
 
 async function createProduct(req: Request, res: Response) {
@@ -102,13 +102,7 @@ async function searchProduct(req: Request, res: Response) {
       limit,
       total: products.length,
     }
-    // const { query } = req.query
-    // const products = await Product.find({
-    //   productName: { $regex: query, $options: 'i' },
-    // })
-    // if (!products) {
-    //   throw new Error('No products found')
-    // }
+
     res.status(200).json({ response })
   } catch (error: any) {
     console.error(error.message)
@@ -134,6 +128,26 @@ async function addToFavorites(req: IRequestWithUser, res: Response) {
     res.status(500).json({ message: error.message })
   }
 }
+
+async function getFavorites(req: IRequestWithUser, res: Response) {
+  try {
+    const user = req.user
+    const favorites = await user.populate('favorites').execPopulate()
+    const products: IProduct[] = []
+
+    for (const favorite of favorites.favorites) {
+      const product = await Product.findOne({ sku: favorite.sku })
+      if (product) {
+        products.push(product)
+      }
+    }
+
+    res.status(200).json({ products })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
 export {
   createProduct,
   getProducts,
@@ -142,4 +156,5 @@ export {
   deleteProduct,
   searchProduct,
   addToFavorites,
+  getFavorites,
 }
