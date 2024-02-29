@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import Product, { IProduct } from '../schemas/product.schema'
+import User from '../schemas/user.schema'
 import { IRequestWithUser } from './auth.controller'
+import { uploadImages } from './uploads.controller'
 
 async function createProduct(req: Request, res: Response) {
   try {
@@ -118,8 +120,12 @@ async function addToFavorites(req: IRequestWithUser, res: Response) {
       throw new Error('Product not found')
     }
 
-    const user = req.user
-    user.favorites.push(product._id)
+    const userId = req.userId
+    const user = await User.findOne({ _id: userId })
+    if (!user) {
+      throw new Error('User not found')
+    }
+    user.favorites.push(product.sku)
     await user.save()
 
     res.status(200).json({ message: 'Product added to favorites' })
@@ -131,12 +137,15 @@ async function addToFavorites(req: IRequestWithUser, res: Response) {
 
 async function getFavorites(req: IRequestWithUser, res: Response) {
   try {
-    const user = req.user
-    const favorites = await user.populate('favorites').execPopulate()
+    const userId = req.userId
+    const user = await User.findOne({ _id: userId })
+    if (!user) {
+      throw new Error('No favorites found')
+    }
     const products: IProduct[] = []
 
-    for (const favorite of favorites.favorites) {
-      const product = await Product.findOne({ sku: favorite.sku })
+    for (const favorite of user.favorites) {
+      const product = await Product.findOne({ sku: favorite })
       if (product) {
         products.push(product)
       }
@@ -148,13 +157,31 @@ async function getFavorites(req: IRequestWithUser, res: Response) {
     res.status(500).json({ message: error.message })
   }
 }
+
+async function uploadProductImages(req: IRequestWithUser, res: Response) {
+  try {
+    const urlKey = `${req.userId}/${req.body.sku}`
+    const files = req.files as Express.Multer.File[]
+    const productImages = await uploadImages(files, urlKey)
+
+    if (!productImages) {
+      throw new Error('Failed to upload images')
+    }
+
+    res.status(200).json({ productImages })
+  } catch (error: any) {
+    console.error(error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
 export {
-  createProduct,
-  getProducts,
-  getProductBySku,
-  updateProduct,
-  deleteProduct,
-  searchProduct,
   addToFavorites,
+  createProduct,
+  deleteProduct,
   getFavorites,
+  getProductBySku,
+  getProducts,
+  searchProduct,
+  updateProduct,
+  uploadProductImages,
 }

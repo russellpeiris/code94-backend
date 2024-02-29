@@ -1,10 +1,8 @@
-import { config } from 'dotenv'
 import mongoose from 'mongoose'
 
 mongoose.set('strictQuery', false)
 
 export const connectDB = async () => {
-  config()
   const uri = process.env.MONGO_URI
   if (!uri) {
     throw new Error('MongoDB URI is not defined')

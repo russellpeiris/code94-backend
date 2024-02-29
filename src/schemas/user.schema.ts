@@ -5,6 +5,7 @@ import { hashPassword } from '../../utils/hash.util'
 export interface IUser extends Document {
   username: string
   password: string
+  favorites: string[]
   comparePassword(password: string): Promise<boolean>
 }
 const userSchema = new Schema({

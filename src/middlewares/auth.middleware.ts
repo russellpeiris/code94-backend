@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Response } from 'express'
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import { IRequestWithUser } from '../controllers/auth.controller'
 import User from '../schemas/user.schema'
 
 //check if the user is authenticated
 export async function authenticate(
-  req: Request,
+  req: IRequestWithUser,
   res: Response,
   next: NextFunction,
 ) {
@@ -24,6 +25,7 @@ export async function authenticate(
     if (!user) {
       res.status(401).json({ message: 'Unauthorized, username not found' })
     }
+    req.userId = decoded.userId
     next()
   } catch (error: any) {
     console.error('Failed to authenticate user', error.message)

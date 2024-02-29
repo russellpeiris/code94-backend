@@ -4,7 +4,7 @@ import User from '../schemas/user.schema'
 import { Request, Response } from 'express'
 
 export interface IRequestWithUser extends Request {
-  user?: any
+  userId?: string
 }
 const generateToken = (res: Response, userId: Types.ObjectId) => {
   const jwtSecret = process.env.JWT_SECRET || ''
@@ -43,8 +43,9 @@ async function login(req: IRequestWithUser, res: Response) {
     }
 
     generateToken(res, user._id)
-    req.user = user
-    res.status(200).json({ message: 'Logged in successfully', user })
+    req.userId = user._id
+
+    res.status(200).json({ message: 'Logged in successfully', user: user._id })
   } catch (error: any) {
     console.error(error.message)
     return res.status(500).json({ message: error.message })
