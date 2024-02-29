@@ -1,5 +1,5 @@
 import bycrypt from 'bcrypt'
-import { Schema, model } from 'mongoose'
+import { Schema, model, Document } from 'mongoose'
 import { hashPassword } from '../../utils/hash.util'
 
 export interface IUser extends Document {
