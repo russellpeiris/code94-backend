@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import User from '../schemas/user.schema'
 
+//check if the user is authenticated
 export async function authenticate(
   req: Request,
   res: Response,

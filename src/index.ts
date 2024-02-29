@@ -21,8 +21,9 @@ app.use(express.json())
 
 const port = process.env.PORT ?? 4001
 
-app.use('/api', authenticate, authRouter)
+app.use('/api', authRouter)
 
+// Start the server after connecting to the database
 connectDB()
   .then(() => {
     app.listen(port, () => {
