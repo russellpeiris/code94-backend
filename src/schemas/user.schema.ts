@@ -1,6 +1,6 @@
 import bycrypt from 'bcrypt'
 import { Schema, model } from 'mongoose'
-import { hashPassword } from '../utils/hash.util'
+import { hashPassword } from '../../utils/hash.util'
 
 export interface IUser extends Document {
   username: string
@@ -17,6 +17,16 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
+  },
+  favorites: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+    },
+  ],
+  isAdmin: {
+    type: Boolean,
+    default: false,
   },
 })
 

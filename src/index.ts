@@ -2,9 +2,8 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { config } from 'dotenv'
 import express, { type Express } from 'express'
-import { connectDB } from '../config/DBconnect'
-import { authenticate } from '../middlewares/auth.middleware'
-import authRouter from '../routes/auth.routes'
+import { connectDB } from './config/DBconnect'
+import authRouter from './routes/auth.routes'
 config()
 
 const app: Express = express()
