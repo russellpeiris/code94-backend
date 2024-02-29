@@ -87,14 +87,29 @@ async function deleteProduct(req: Request, res: Response) {
 
 async function searchProduct(req: Request, res: Response) {
   try {
-    const { query } = req.query
+    const page = parseInt(req.query.page as string) - 1 || 0
+    const limit = parseInt(req.query.limit as string) || 10
+    const search = (req.query.search as string) || ''
     const products = await Product.find({
-      productName: { $regex: query, $options: 'i' },
+      productName: { $regex: search, $options: 'i' },
     })
-    if (!products) {
-      throw new Error('No products found')
+      .skip(page * limit)
+      .limit(limit)
+
+    const response = {
+      products,
+      page: page + 1,
+      limit,
+      total: products.length,
     }
-    res.status(200).json({ products })
+    // const { query } = req.query
+    // const products = await Product.find({
+    //   productName: { $regex: query, $options: 'i' },
+    // })
+    // if (!products) {
+    //   throw new Error('No products found')
+    // }
+    res.status(200).json({ response })
   } catch (error: any) {
     console.error(error.message)
     res.status(500).json({ message: error.message })
