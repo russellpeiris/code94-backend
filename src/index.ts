@@ -3,9 +3,9 @@ import cors from 'cors'
 import { config } from 'dotenv'
 import express, { type Express } from 'express'
 import { connectDB } from './config/DBconnect'
+import { authenticate } from './middlewares/auth.middleware'
 import authRouter from './routes/auth.routes'
 import productRouter from './routes/product.routes'
-import { authenticate } from './middlewares/auth.middleware'
 config()
 
 const app: Express = express()
@@ -13,7 +13,7 @@ const app: Express = express()
 app.use(cookieParser())
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:5173',
     credentials: true,
   }),
 )
@@ -23,7 +23,7 @@ app.use(express.json())
 const port = process.env.PORT ?? 4001
 
 app.use('/api/auth', authRouter)
-app.use('/api/products', authenticate, productRouter)
+app.use('/api/products', productRouter)
 
 // Start the server after connecting to the database
 connectDB()

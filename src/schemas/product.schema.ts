@@ -7,6 +7,7 @@ export interface IProduct {
   productPrice: number
   productImages: string[]
   productDescription: string
+  isFavorite?: boolean
 }
 
 const productSchema = new Schema({
@@ -25,18 +26,22 @@ const productSchema = new Schema({
   },
   productPrice: {
     type: Number,
-    required: true,
+    // required: true,
   },
   productImages: {
     type: [String],
-    required: true,
-    validate: {
-      validator: (v: string[]) => v.length > 0,
-      message: 'At least one image is required',
-    },
+    // required: true,
+    // validate: {
+    //   validator: (v: string[]) => v.length > 0,
+    //   message: 'At least one image is required',
+    // },
   },
   productDescription: {
     type: String,
+  },
+  isFavorite: {
+    type: Boolean,
+    default: false,
   },
 })
 

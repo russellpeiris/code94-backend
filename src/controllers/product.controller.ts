@@ -89,11 +89,12 @@ async function deleteProduct(req: Request, res: Response) {
 
 async function searchProduct(req: Request, res: Response) {
   try {
+    //TODO: Add pagination & search on frontend
     const page = parseInt(req.query.page as string) - 1 || 0
     const limit = parseInt(req.query.limit as string) || 10
     const search = (req.query.search as string) || ''
     const products = await Product.find({
-      productName: { $regex: search, $options: 'i' },
+      sku: { $regex: search, $options: 'i' },
     })
       .skip(page * limit)
       .limit(limit)
@@ -119,14 +120,17 @@ async function addToFavorites(req: IRequestWithUser, res: Response) {
     if (!product) {
       throw new Error('Product not found')
     }
+    //TODO: After frontend for auth done
+    // const userId = req.userId
+    // const user = await User.findOne({ _id: userId })
+    // if (!user) {
+    //   throw new Error('User not found')
+    // }
+    // user.favorites.push(product.sku)
+    // await user.save()
 
-    const userId = req.userId
-    const user = await User.findOne({ _id: userId })
-    if (!user) {
-      throw new Error('User not found')
-    }
-    user.favorites.push(product.sku)
-    await user.save()
+    product.isFavorite = true
+    await product.save()
 
     res.status(200).json({ message: 'Product added to favorites' })
   } catch (error: any) {
